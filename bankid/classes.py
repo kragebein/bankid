@@ -22,12 +22,17 @@ class Auth:
     user: dict = None
 
     def __init__(self, key):
-        x = Users()
+        self.x = Users()
         self.key = key
-        if self.key in x.userlist:
-            self.user = x.userlist[self.key]
+        if self.key in self.x.userlist:
+            self.user = self.x.userlist[self.key]
             self.is_authorized = True
 
+    def get(self):
+        ''' Gets the user data'''
+        if not self.is_authorized:
+            return []
+        return self.x.userlist[self.key]
 
     def __str__(self):
         return self.is_authorized
