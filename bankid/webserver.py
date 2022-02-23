@@ -48,7 +48,7 @@ class Webserver():
 
         # If the authorization key is okay, the
         # Auth object will contain the details of the caller.
-
+        print(authorize.get())
         return authorize.is_authorized
 
 
