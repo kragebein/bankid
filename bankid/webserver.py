@@ -7,6 +7,7 @@ from aiohttp import web
 from bankid.config import Config
 from bankid.bankid import BankID
 from bankid.classes import Auth, Api
+from bankid.stats import Stats
 
 
 class Webserver():
@@ -16,9 +17,9 @@ class Webserver():
 
     def __init__(self):
 
-        self.bidi = BankID()
+        self.stat = Stats()
+        self.bidi = BankID(self.stat)
         self.config = Config()
-
 
     async def run(self) -> None:
         ''' Sets up and runs an aiohttp web server with the bankid and api routes'''
@@ -26,13 +27,15 @@ class Webserver():
 
         aiohttp_jinja2.setup(
             app,
-            loader=jinja2.FileSystemLoader(
-                                        'templates'))
+            loader=jinja2.FileSystemLoader('templates'))
 
         app.add_routes(
-            [   web.get('/{key}/bankid', self.handler),
-                web.get('/{key}/api', self.api)
-            ] )
+            [
+             web.get('/{key}/bankid', self.handler),
+             web.get('/{key}/api', self.api),
+             web.get('/{key}/stats', self.get_stats)
+                ]
+            )
 
         runner = web.AppRunner(app)
         await runner.setup()
@@ -41,20 +44,38 @@ class Webserver():
         await site.start()
         await asyncio.Event().wait()
 
-
     async def auth(self, key):
         ''' Creats an Auth Object with information about caller '''
-        authorize = Auth(key)
+        a = Auth(key)
 
         # If the authorization key is okay, the
         # Auth object will contain the details of the caller.
-        print(authorize.get())
-        return authorize.is_authorized
+        return a
 
+    async def get_stats(self, request) -> web.Response:
+        ''' Api View of different statistics from the database.'''
+        auth = await self.auth(request.match_info['key'])
+        if auth.is_auth:
 
-    async def api(self, request):
+            if 'Stian Langvann' in auth.user:
+                stat, hits, success, fails, errors = await self.stat.get_stats()
+                data = {
+                    'total_hits': hits,
+                    'total_success': success,
+                    'total_failed': fails,
+                    'errors': errors
+                }
+                return web.Response(
+                    text=json.dumps(data, indent=2)
+                )
+        return await self.unauthorized()
+
+    async def api(self, request) -> web.Response:
         ''' Handles the "api" endpoint, checks with auth and returns an Api Object in dict form.'''
-        if await self.auth(request.match_info['key']):
+        auth = await self.auth(request.match_info['key'])
+        if auth.is_auth:
+
+            await self.stat.authorized()
 
             # Build the Api endpoint
             await self.bidi.update()
@@ -72,17 +93,14 @@ class Webserver():
                 )
 
         # or return the unauthorized message
-        return web.Response(
-            content_type="application/json",
-            text='{"message": "Unauthorized"}',
-            status=403
-            )
-        
+        return await self.unauthorized()
 
-    async def handler(self,request):
+    async def handler(self, request):
         ''' Handles the "bankid" endpoint. Returns a jinja html template.'''
-        if await self.auth(request.match_info['key']):
-            
+        auth = await self.auth(request.match_info['key'])
+        if auth.is_auth:
+            await self.stat.authorized()
+
             # Returns the Jinja Document
             await self.bidi.update()
             data = self.bidi.get_status()
@@ -93,9 +111,16 @@ class Webserver():
                 status=200
                 )
             return return_data
-        # or returns the unauthorized message      
+        # or returns the unauthorized message
+        return await self.unauthorized()
+
+    async def unauthorized(self):
+        message = {'message': {'auth': 'Unauthorized'}}
+
+        await self.stat.unauthorized()
+
         return web.Response(
             content_type="application/json",
-            text='{"message": "Unauthorized"}',
+            text=json.dumps(message, indent=2),
             status=403
             )
