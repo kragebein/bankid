@@ -1,27 +1,35 @@
+import sqlite3
+
+from typing import Any
+
+
 class Users:
 
     def __init__(self):
 
+        self.connect = sqlite3.connect('users.db')
+        self.cursor = self.connect.cursor()
+        self.user = None
 
-        self.userlist = {
-            'd867acb6b60e15731d9df1c4a7c386f069f3e6eb': {
-                'user': 'Stian Langvann',
-                'email': 'stian.langvann@gmail.com',
-                'phone': '+47 942 47 659',
-                'method': 'paypal',
-                'expire': 1647154274
-                },
-            '85136c79cbf9fe36bb9d05d0639c70c265c18d37': {
-                'user': 'TietoEvry AS',
-                'email': 'bankingservices247@tietoevry.com',
-                'phone': '+47 000 00 000',
-                'method': 'free_account',
-                'expire': -1 
-                }
-            }
+    def sql(self, key) -> Any:
+        """ Requests the user data from the database"""
 
-        self.check()
+        sql = 'SELECT * FROM users WHERE key = ?'
+        data = self.cursor.execute(sql, [key, ])
+        return data.fetchall()
 
-    def check(self) -> None:
-        ''' Checks for expiry '''
+    def check(self, key) -> bool:
+        ''' Checks if key is in database'''
+
+        data = self.sql(key)
+        if data and len(data) == 1:
+            self.user = data[0]
+            self.connect.close()
+            return True
+        elif data and len(data) > 1:
+            print(f'Error, too many results for this api key:{key}')
+            return False
+        return False
+
+    def add(self, **user) -> None:
         pass
