@@ -1,15 +1,15 @@
 import requests
 import time
-import json
 
 from typing import Any
 from bs4 import BeautifulSoup
-from bankid.classes import Status, Api
+from bankid.classes import Status
+
 
 class BankID():
 
-    def __init__(self):
-    
+    def __init__(self, stats):
+        self.stats = stats
         self.status = Status()
         self.openapi = {}
         self.api = {'Init': 'initializing'}
@@ -17,10 +17,10 @@ class BankID():
         self.code: dict = {
             1: {
                 'meaning': 'Bankid har grønne lamper, alt er tut og kjør!',
-                'text': 'BankID: Alt virker.', 
+                'text': 'BankID: Alt virker.',
                 'color': 'green',
                 'field': '<span class="color-dot none">'
-                }, 
+                },
             2: {
                 'meaning': 'Gul lampe. Betyr tregheter eller at noe er nede.',
                 'text': 'BankID: Delvis nede.',
@@ -29,7 +29,7 @@ class BankID():
                 },
             3: {
                 'meaning': 'En eller flere tjenester hos bankID eller Underleverandører er nede',
-                'text': 'BankID: delvis nede.', 
+                'text': 'BankID: delvis nede.',
                 'color': 'orange',
                 'field': '<span class="color-dot major">'
                 },
@@ -38,23 +38,23 @@ class BankID():
                 'text': 'BankID: er helt nede.',
                 'color': 'red',
                 'field': '<span class="color-dot critical">'
-                }, 
+                },
             5: {
                 'meaning': 'BankID er helt eller delvis utilgjengelig på grunn av planlagt vedlikehold.',
-                'text': 'BankID: Vedlikehold.', 
+                'text': 'BankID: Vedlikehold.',
                 'color': 'blue',
                 'field': '<span class="color-dot maintenance">'
-                }, 
+                },
             9: {
                 'meaning': 'En feil gjør at dette BIDI ikke klarer innehente ny data fra BankID.no\nKontakt IT.',
-                'text': 'BIDI: Error 9.', 
+                'text': 'BIDI: Error 9.',
                 'color': 'black',
                 'field': '11111111111111111111111111111111111'
                 }
             }
         self.refresh = 30
         self.lastupdate = int(time.time())
-    
+
     async def update(self) -> None:
 
         if self.lastupdate + self.refresh <= int(time.time()):
@@ -62,43 +62,52 @@ class BankID():
             bankid_data = await self.from_bankid()
             status = await self.parsedata(bankid_data)
             await self.updatestatus(status, bankid_data)
-            
+
             self.lastupdate = int(time.time())
 
-    async def parsedata(self, data:str) -> int:
+    async def parsedata(self, data: str) -> int:
         if data is None:
             return 9
         soup = BeautifulSoup(data, 'html.parser')
         for _data in soup.find_all("div", {"class": "m-statuspage"}):
-                    _data = str(_data)
-                    _data = _data.replace('\n','')
+            _data = str(_data)
+            _data = _data.replace('\n', '')
 
-                    for code in self.code:
-                        if self.code[code]['field'] in _data:
-                            print(f'Status: {code}')
-                            return code
-        # Return error code we couldnt find 'field' data. 
+            for code in self.code:
+                if self.code[code]['field'] in _data:
+                    print(f'Status: {code}')
+                    return code
+        # Return error code we couldnt find 'field' data.
         return 9
-                        
-    async def updatestatus(self, code:int, data: str) -> None:
-            self.status = Status(
-                int(code),
-                self.code[code]['meaning'],
-                self.code[code]['text'],
-                None if code in [1, 9] else await self.get_extra(data),
+
+    async def updatestatus(self, code: int, data: str) -> None:
+        ''' Updating the web view, api and db with status change.'''
+        extra = None if code in [1, 9] else await self.get_extra(data)
+
+        if code != self.status.statuscode and code not in [1, 9]:
+            await self.stats.changestatus(
                 self.code[code]['color'],
+                extra
                 )
-            
-            self.api = {'bidi': {
-                'status': int(code),
-                'color': self.code[code]['color'],
-                'text': self.code[code]['text'],
-                'extra': None if code in [1, 9] else await self.get_extra(data),
-                'meaning': self.code[code]['meaning']
-                    }
+
+        self.status = Status(
+            int(code),
+            self.code[code]['meaning'],
+            self.code[code]['text'],
+            extra,
+            self.code[code]['color'],
+            )
+
+        self.api = {'bidi': {
+            'status': int(code),
+            'color': self.code[code]['color'],
+            'text': self.code[code]['text'],
+            'extra': extra,
+            'meaning': self.code[code]['meaning']
                 }
-            
-            self.openapi = await self.statuspages()
+            }
+
+        self.openapi = await self.statuspages()
 
     async def statuspages(self):
         url = 'https://bankid-services.statuspage.io/'
@@ -109,13 +118,11 @@ class BankID():
             if r.status_code == 200:
                 return r.json()
         except Exception as E:
+            self.stats.error()
             print(E)
             return response
-        
 
-
-
-    async def get_extra(self, data:str) -> Any:
+    async def get_extra(self, data: str) -> Any:
         ret = None
         soup = BeautifulSoup(data, 'html.parser')
         _data = soup.find_all("div", {"class": "m-statuspage-description"})
@@ -131,9 +138,9 @@ class BankID():
             else:
                 return None
         except requests.exceptions.RequestException as E:
+            self.stats.errors()
             print(f'Error while requesting, error: {E}')
             return None
 
     def get_status(self) -> Status:
         return self.status
-
