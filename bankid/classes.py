@@ -22,8 +22,8 @@ class Auth:
     is_auth: bool = False
     user: dict = None
 
-    def __init__(self, key):
-        self.x = Users()
+    def __init__(self, key, db):
+        self.x = Users(db)
         if self.x.check(key):
             print(self.x.user)
             self.is_auth = True

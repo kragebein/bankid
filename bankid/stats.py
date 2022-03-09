@@ -1,18 +1,19 @@
-import sqlite3
 import datetime
 
 
 class Stats:
 
-    def __init__(self):
-        self.connect = sqlite3.connect('users.db')
-        self.cursor = self.connect.cursor()
+    def __init__(self, db):
+        self.db = db
+        self.connect = db.conn
+        self.cursor = db.cursor
 
     async def unauthorized(self):
         ''' Increases the Failed ticker by one.'''
         self.cursor.execute(
             'UPDATE stats SET failed = failed + 1 WHERE stat = stat;'
             )
+        await self.hits()
         self.connect.commit()
 
     async def hits(self):
@@ -20,19 +21,21 @@ class Stats:
         self.cursor.execute(
             'UPDATE stats SET hits = hits +1 WHERE stat = stat;'
         )
-        self.connect.commit()
 
     async def authorized(self):
         ''' Increases the success counter by 1'''
         self.cursor.execute(
             'UPDATE stats SET success = success + 1 WHERE stat = stat;'
         )
+        await self.hits()
+        self.connect.commit()
 
     async def errors(self):
         ''' Increases the error counter'''
         self.cursor.execute(
             'UPDATE stats SET errors = errors +1 WHERE stat = stat;'
         )
+        await self.hits()
         self.connect.commit()
 
     async def changestatus(self, color=None, reason=None):
