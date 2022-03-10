@@ -9,7 +9,7 @@ class Users:
         self.user = None
 
     def sql(self, key) -> Any:
-        
+
         """ Requests the user data from the database"""
         sql = 'SELECT * FROM users WHERE key = ?'
         data = self.cursor.execute(sql, [key, ])
