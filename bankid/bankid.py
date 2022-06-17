@@ -1,16 +1,19 @@
+from bankid.stats import Timeline
+from pyotp import random
 import requests
 import time
+import asyncio
 
 from typing import Any
 from bs4 import BeautifulSoup
 from bankid.classes import Status
 
 
-class BankID():
-
+class BankID:
     def __init__(self, stats):
         self.stats = stats
         self.status = Status()
+        self.timeline = Timeline()
         self.openapi = {}
         self.api = {'Init': 'initializing'}
         self.url = 'https://www.bankid.no/status'
@@ -19,51 +22,47 @@ class BankID():
                 'meaning': 'Bankid har grønne lamper, alt er tut og kjør!',
                 'text': 'BankID: Alt virker.',
                 'color': 'green',
-                'field': '<span class="color-dot none">'
-                },
+                'field': '<span class="color-dot none">',
+            },
             2: {
                 'meaning': 'Gul lampe. Betyr tregheter eller at noe er nede.',
                 'text': 'BankID: Delvis nede.',
                 'color': 'yellow',
-                'field': '<span class="color-dot minor">'
-                },
+                'field': '<span class="color-dot minor">',
+            },
             3: {
                 'meaning': 'En eller flere tjenester hos bankID eller Underleverandører er nede',
                 'text': 'BankID: delvis nede.',
                 'color': 'orange',
-                'field': '<span class="color-dot major">'
-                },
+                'field': '<span class="color-dot major">',
+            },
             4: {
                 'meaning': 'Rødt lys hos BankID. Alle tjenester er utilgjengelige.',
                 'text': 'BankID: er helt nede.',
                 'color': 'red',
-                'field': '<span class="color-dot critical">'
-                },
+                'field': '<span class="color-dot critical">',
+            },
             5: {
                 'meaning': 'BankID er helt eller delvis utilgjengelig på grunn av planlagt vedlikehold.',
                 'text': 'BankID: Vedlikehold.',
                 'color': 'blue',
-                'field': '<span class="color-dot maintenance">'
-                },
+                'field': '<span class="color-dot maintenance">',
+            },
             9: {
                 'meaning': 'En feil gjør at dette BIDI ikke klarer innehente ny data fra BankID.no\nKontakt IT.',
                 'text': 'BIDI: Error 9.',
                 'color': 'black',
-                'field': '11111111111111111111111111111111111'
-                }
-            }
+                'field': '11111111111111111111111111111111111',
+            },
+        }
         self.refresh = 30
         self.lastupdate = int(time.time())
 
     async def update(self) -> None:
 
-        if self.lastupdate + self.refresh <= int(time.time()):
-            # Only update if it is 30 seconds since the last update.
-            bankid_data = await self.from_bankid()
-            status = await self.parsedata(bankid_data)
-            await self.updatestatus(status, bankid_data)
-
-            self.lastupdate = int(time.time())
+        bankid_data = await self.from_bankid()
+        status = await self.parsedata(bankid_data)
+        await self.updatestatus(status, bankid_data)
 
     async def parsedata(self, data: str) -> int:
         if data is None:
@@ -80,32 +79,39 @@ class BankID():
         # Return error code we couldnt find 'field' data.
         return 9
 
+    async def updateloop(self) -> None:
+        '''Loop that runs update every 30 seconds.'''
+        timer = int(time.time())
+        while True:
+            if timer < int(time.time()):
+                await self.update()
+                timer += 60
+            await asyncio.sleep(1)
+
     async def updatestatus(self, code: int, data: str) -> None:
-        ''' Updating the web view, api and db with status change.'''
+        '''Updating the web view, api and db with status change.'''
         extra = None if code in [1, 9] else await self.get_extra(data)
 
         if code != self.status.statuscode and code not in [1, 9]:
-            await self.stats.changestatus(
-                self.code[code]['color'],
-                extra
-                )
+            await self.stats.changestatus(self.code[code]['color'], extra)
 
         self.status = Status(
-            int(code),
-            self.code[code]['meaning'],
-            self.code[code]['text'],
-            extra,
-            self.code[code]['color'],
-            )
+            int(code), self.code[code]['meaning'], self.code[code]['text'], extra, self.code[code]['color'], random
+        )
 
-        self.api = {'bidi': {
-            'status': int(code),
-            'color': self.code[code]['color'],
-            'text': self.code[code]['text'],
-            'extra': extra,
-            'meaning': self.code[code]['meaning']
-                }
+        # Updates the timeline
+        status_text = extra if extra is not None else self.code[code]['text']
+        self.timeline.put(status_text, self.code[code]['color'])
+
+        self.api = {
+            'bidi': {
+                'status': int(code),
+                'color': self.code[code]['color'],
+                'text': self.code[code]['text'],
+                'extra': extra,
+                'meaning': self.code[code]['meaning'],
             }
+        }
 
         self.openapi = await self.statuspages()
 
@@ -118,7 +124,7 @@ class BankID():
             if r.status_code == 200:
                 return r.json()
         except Exception as E:
-            self.stats.error()
+            self.stats.errors()
             print(E)
             return response
 
@@ -138,8 +144,8 @@ class BankID():
             else:
                 return None
         except requests.exceptions.RequestException as E:
-            self.stats.errors()
             print(f'Error while requesting, error: {E}')
+            await self.stats.errors()
             return None
 
     def get_status(self) -> Status:

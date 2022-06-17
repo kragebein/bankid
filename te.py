@@ -1,11 +1,10 @@
-import requests
+import time
+now = int(time.time())
+print(now * 100)
 
-url = 'https://bankid-services.statuspage.io/'
-header = {'Accept': 'application/json'}
-response = {'Error': 'Couldnt retrieve data from statuspages.'}
+seconds_in_a_week = 604800
 
-r = requests.get(url, headers=header)
-print(r)
+print(60*24*60*7)
 
-
-
+import random
+random.randint

@@ -1,23 +1,21 @@
 
 import json
-import sys
 from json.decoder import JSONDecodeError
+
 
 class Config():
 
     def read(self, top):
         try:
-            with open('config.json', 'r') as configuration:
+            with open('config.json', 'r', encoding='UTF-8') as configuration:
                 data = json.loads(configuration.read())
                 top.host = data['webserver']['host']
                 top.port = data['webserver']['port']
-                
                 top.bidi.refresh = data['refresh_time']
-        except JSONDecodeError as E:
-            print(f'Misconfigured config: {E}')
-            sys.exit(1)
-        except FileNotFoundError as E:
-            print(f'Configuration file not found: {E}')
-            sys.exit(1)
-        except AttributeError as E:
-            print('AttributeError: {E}')
+                print(top)
+        except JSONDecodeError as e:
+            raise Exception(f'Could not read config: {e}') from e
+        except FileNotFoundError as e:
+            raise Exception('File not Found') from e
+        except AttributeError as e:
+            raise AttributeError(f'AttributeError: {e}') from e
