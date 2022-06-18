@@ -56,7 +56,7 @@ class Webserver:
         print(f'Running at {self.host}:{self.port}')
         await asyncio.Event().wait()
 
-    async def about(self, request):
+    async def about(self, request):  # noqa W0613
         '''Returns the about me dict'''
         about = {
             'author': 'Stian Langvann',
@@ -88,14 +88,14 @@ class Webserver:
 
         return await self.unauthorized()
 
-    async def get_stats(self, request, indata=None) -> web.Response:
+    async def get_stats(self, request, indata=None) -> web.Response:  # noqa W0613
         '''Api View of different statistics from the database.'''
         auth = await self.auth(request.match_info['key'])
         if auth.is_auth:
             await self.stat.authorized()
             try:
                 if 'Stian Langvann' in auth.user:
-                    stat, hits, success, fails, errors = await self.stat.get_stats()
+                    _, hits, success, fails, errors = await self.stat.get_stats()
                     new_key = str(datetime.datetime.now())
                     key = hashlib.md5(new_key.encode())
 
@@ -108,7 +108,7 @@ class Webserver:
                     }
 
                     return aiohttp_jinja2.render_template('admin.html', request, data)
-            except Exception:
+            except Exception:  # noqa: W0703
                 traceback.print_exc()
                 return await self.unauthorized()
         return await self.unauthorized()
@@ -132,8 +132,6 @@ class Webserver:
     async def bankid(self, request):
         '''Handles the "bankid" endpoint. Returns a jinja html template.'''
         auth = await self.auth(request.match_info['key'])
-        ts = await self.stat.get_timeline()
-        print(ts)
         if auth.is_auth:
             await self.stat.authorized()
 

@@ -1,5 +1,4 @@
 from bankid.stats import Timeline
-from pyotp import random
 import requests
 import time
 import asyncio
@@ -96,7 +95,11 @@ class BankID:
             await self.stats.changestatus(self.code[code]['color'], extra)
 
         self.status = Status(
-            int(code), self.code[code]['meaning'], self.code[code]['text'], extra, self.code[code]['color'], random
+            int(code),
+            self.code[code]['meaning'],
+            self.code[code]['text'],
+            extra,
+            self.code[code]['color'],
         )
 
         # Updates the timeline
@@ -123,7 +126,7 @@ class BankID:
             r = requests.get(url, headers=header)
             if r.status_code == 200:
                 return r.json()
-        except Exception as E:
+        except Exception as E:  # noqa: W0703
             self.stats.errors()
             print(E)
             return response
@@ -143,8 +146,8 @@ class BankID:
                 return r.content
             else:
                 return None
-        except requests.exceptions.RequestException as E:
-            print(f'Error while requesting, error: {E}')
+        except requests.exceptions.RequestException as e:
+            print(f'Error while requesting, error: {e}')
             await self.stats.errors()
             return None
 

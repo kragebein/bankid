@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from bankid.users import Users
 import datetime
-import random
 
 
 @dataclass(frozen=True)
@@ -11,7 +10,6 @@ class Status:
     text: str = 'Initialiserer'
     extra: str = ''
     color: str = 'black'
-    random: random = random
 
     def __repr__(self):
         return self.statuscode
@@ -34,7 +32,7 @@ class Auth:
             self.user = self.x.user
 
     def get(self):
-        ''' Gets the user data'''
+        '''Gets the user data'''
         if not self.is_auth:
             return []
         return self.user
@@ -55,70 +53,35 @@ class Api:
 
 @dataclass
 class statusUpdate:
-
     def __init__(self, status):
         self.status = status
 
     def block(self):
 
-        blocks = {
-                [
-                    {
-                        'type': 'header',
-                        'text': {
-                            'type': 'plain_text',
-                            'text': 'BankID status update.',
-                            'emoji': False
-                        }
-                    },
-                    {
-                        'type': 'section',
-                        'fields': [
-                            {
-                                'type': 'mrkdwn',
-                                'text': 'BankID has a status update '
-                            }
-                        ]
-                    },
-                    {
-                        'type': 'section',
-                        'fields': [
-                            {
-                                'type': 'mrkdwn',
-                                'text': f'*When:*\n {datetime.datetime.now()}'
-                            },
-                            {
-                                'type': 'mrkdwn',
-                                'text': f'*Severity:*\n{self.severity}'
-                            }
-                        ]
-                    },
-                    {
-                        'type': 'section',
-                        'fields': [
-                            {
-                                'type': 'mrkdwn',
-                                'text': f'*Offending task:*\n{self.task}'
-                            },
-                            {
-                                'type': 'mrkdwn',
-                                'text': f'*Current value:*\n{self.value}'
-                            }
-                        ]
-                    },
-                    {
-                        'type': 'section',
-                        'fields': [
-                            {
-                                'type': 'mrkdwn',
-                                'text': f'*Threshold level*\n\n{self.level}'
-                            },
-                            {
-                                'type': 'mrkdwn',
-                                'text': f'*Default value (Historic)*\n{self.historic}'
-                            }
-                        ]
-                    }
-                ]
-            }
-        return blocks
+        return {
+            [
+                {'type': 'header', 'text': {'type': 'plain_text', 'text': 'BankID status update.', 'emoji': False}},
+                {'type': 'section', 'fields': [{'type': 'mrkdwn', 'text': 'BankID has a status update '}]},
+                {
+                    'type': 'section',
+                    'fields': [
+                        {'type': 'mrkdwn', 'text': f'*When:*\n {datetime.datetime.now()}'},
+                        {'type': 'mrkdwn', 'text': '*Severity:*\n'},
+                    ],
+                },
+                {
+                    'type': 'section',
+                    'fields': [
+                        {'type': 'mrkdwn', 'text': '*Offending task:*\n'},
+                        {'type': 'mrkdwn', 'text': '*Current value:*\n'},
+                    ],
+                },
+                {
+                    'type': 'section',
+                    'fields': [
+                        {'type': 'mrkdwn', 'text': '*Threshold level*\n\n'},
+                        {'type': 'mrkdwn', 'text': '*Default value (Historic)*\n'},
+                    ],
+                },
+            ]
+        }
