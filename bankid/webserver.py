@@ -44,6 +44,7 @@ class Webserver:
                 web.get('/{key}/api', self.api),
                 web.post('/{key}/admin', self.get_stats_post),
                 web.get('/{key}/admin', self.get_stats),
+                web.get('/', self.about),
             ]
         )
 
@@ -54,6 +55,22 @@ class Webserver:
         await site.start()
         print(f'Running at {self.host}:{self.port}')
         await asyncio.Event().wait()
+
+    async def about(self, request):
+        '''Returns the about me dict'''
+        about = {
+            'author': 'Stian Langvann',
+            'contact': {
+                'email': 'stian@langvann.no',
+                'phone': '0047 942 47 659',
+            },
+            'about': (
+                'bankid.lazywack.no is an alternative bankid status page to bankid.statuspages.io which doesnt include data'
+                ' about mobile bankid. Keeps a 7 day record. Notifies through slack, sms or discord.'
+            ),
+            'access': 'endpoints are only accessible using api keys. Use contact details above.',
+        }
+        return web.Response(content_type="application/json", text=str(json.dumps(about, indent=2)), status=200)
 
     async def auth(self, key):
         '''Creats an Auth Object with information about caller'''
