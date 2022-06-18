@@ -37,14 +37,14 @@ class Stats:
     async def changestatus(self, color=None, reason=None):
         '''Registers a status change'''
 
-        colors = {
-            'yellow': ':large_yellow_circle:',
-            'green': ':large_green_circle:',
-            'red': ':red_circle:',
-            'orange': ':large_orange_circle',
-            'black': ':black_circle',
-            'grey': ':white_circle',
-        }
+        # colors = {
+        #    'yellow': ':large_yellow_circle:',
+        #    'green': ':large_green_circle:',
+        #    'red': ':red_circle:',
+        #    'orange': ':large_orange_circle',
+        #    'black': ':black_circle',
+        #    'grey': ':white_circle',
+        # }
 
         now = int(time.time())
         data = self.cursor.execute('SELECT color FROM status WHERE status = ?;', ('ongoing',)).fetchone()
@@ -65,7 +65,7 @@ class Stats:
         else:
 
             self.cursor.execute(
-                f'INSERT INTO status (status, starttime, endtime, color, reasoning) VALUES(?, ?, ?, ?, ?);',
+                'INSERT INTO status (status, starttime, endtime, color, reasoning) VALUES(?, ?, ?, ?, ?);',
                 ('ongoing', now, 'null', color, reason),
             )
 
@@ -76,20 +76,6 @@ class Stats:
 
         sql = 'SELECT * FROM stats WHERE stat = "stat";'
         return self.cursor.execute(sql).fetchone()
-
-    async def get_timeline(self) -> sqlite3.Row:
-        '''Retrieves the timeline for the last 168 hours'''
-        now = int(time.time())
-        then = int(time.time()) - 604800
-        get_timeline_q = f"""
-            SELECT * from status where ts BETWEEN {now} AND {then}
-        """
-        self.connect.row_factory = sqlite3.Row
-        newcursor = self.connect.cursor()
-        data = newcursor.execute(get_timeline_q).fetchall()
-        self.connect.row_factory = None
-
-        return data
 
 
 class Timeline:
@@ -128,14 +114,14 @@ class Timeline:
                 ?
         """
 
-        for x in range(first, now, 3600):
+        for _ in range(first, now, 3600):
             # Inside the hour.
 
             results = self.cursor.execute(query, (start, end)).fetchall()
             dict_results = {'red': [], 'orange': [], 'yellow': [], 'green': [], 'blue': [], 'black': []}
             for x in reversed(results):
-                time, status, color = x
-                dict_results[color] = status, time
+                _time, status, color = x
+                dict_results[color] = status, _time
 
             for k, v in dict_results.items():
                 if k == 'red' and len(v) > 0:
@@ -163,6 +149,6 @@ class Timeline:
 
 
 if __name__ == "__main__":
-    x = Timeline()
-    for x in x.query():
-        print(x)
+    _test = Timeline()
+    for _testy in _test.query():
+        print(_testy)
