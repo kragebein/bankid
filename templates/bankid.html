@@ -200,26 +200,36 @@ a {text-decoration: none;}
 #line-green{
   height: 3px;
   width: 1px;
+  transition: transform .2s; /* Animation */
+
   background-color: green;
 }
 #line-blue{
   height: 3px;
   width: 1px;
+  transition: transform .2s; /* Animation */
+
   background-color: blue;
 }
 #line-orange{
-  height: 4px;
+  height: 5px;
   width: 1px;
+  transition: transform .2s; /* Animation */
+
   background-color: orange;
 }
 #line-red{
-  height: 5px;
+  height: 7px;
   width: 1px;
+  transition: transform .2s; /* Animation */
+
   background-color: red;
 }
 #line-grey{
   height: 2px;
   width: 1px;
+  transition: transform .2s; /* Animation */
+
   background-color: grey;
 }
 
@@ -228,6 +238,41 @@ a {text-decoration: none;}
   float: left;
 }
 
+
+#line-blue:hover {
+  -webkit-transform: rotate(360deg) scale(5.5);
+  -webkit-transform-origin:bottom right;
+  -moz-transform: rotate(360deg) scale(5.5);
+  -moz-transform-origin:bottom right;
+  transform: rotate(360deg) scale(5.5);
+  transform-origin:bottom right;  
+}
+
+#line-green:hover { 
+  -webkit-transform: rotate(180deg) scale(5.5);
+  -moz-transform: rotate(180deg) scale(5.5);
+  transform: rotate(180deg) scale(5.5);
+}
+#line-orange:hover {
+  -webkit-transform: rotate(360deg) scale(5.5);
+  -moz-transform: rotate(360deg) scale(5.5);
+  transform: rotate(360deg) scale(5.5);
+}
+#line-red:hover {
+  -webkit-transform: rotate(360deg) scale(5.5);
+  -moz-transform: rotate(360deg) scale(5.5);
+  transform: rotate(360deg) scale(5.5);
+}
+#line-blue:hover {
+  -webkit-transform: rotate(360deg) scale(5.5);
+  -moz-transform: rotate(360deg) scale(5.5);
+  transform: rotate(360deg) scale(5.5);
+}
+#line-yellow:hover {
+  -webkit-transform:  scale(5.5);
+  -moz-transform:  scale(5.5);
+  transform:  scale(5.5);
+}
 </style>
 
 <div class="blobs-container"> <div class="blob {{data.color}}" title="{% if data.statuscode != 1 %} {{data.meaning}} {{data.extra}} {% else %} {{data.meaning}} {% endif %}"></div>{{data.text}}</div>
@@ -238,3 +283,4 @@ a {text-decoration: none;}
 <div id="line-{{things.color}}" title="{{things.time}} - {{things.status}}"></div>
 {% endfor %}
 </div>
+
