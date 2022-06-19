@@ -12,7 +12,6 @@ from bankid.bankid import BankID
 from bankid.classes import Auth, Api
 from bankid.stats import Stats, Timeline
 from bankid.db import Database
-from bankid.slack import Slack
 
 
 class Webserver:
@@ -25,7 +24,6 @@ class Webserver:
         self.stat = Stats(self.db)
         self.bidi = BankID(self.stat)
         self.config = Config()
-        self.slack = Slack(self.db)
         self.timeline = Timeline()
 
     async def run(self) -> None:
@@ -41,6 +39,7 @@ class Webserver:
         app.add_routes(
             [
                 web.get('/{key}/bankid', self.bankid),
+                web.get('/healthcheck', self.healthcheck),
                 web.get('/{key}/api', self.api),
                 web.post('/{key}/admin', self.get_stats_post),
                 web.get('/{key}/admin', self.get_stats),
@@ -55,6 +54,9 @@ class Webserver:
         await site.start()
         print(f'Running at {self.host}:{self.port}')
         await asyncio.Event().wait()
+
+    async def healthcheck(self, request):  # noqa: W0613
+        return web.json_response({'running': True})
 
     async def about(self, request):  # noqa W0613
         '''Returns the about me dict'''
@@ -148,4 +150,4 @@ class Webserver:
 
         await self.stat.unauthorized()
 
-        return web.Response(content_type="application/json", text=json.dumps(message, indent=2), status=403)
+        return web.Response(content_type="application/js1on", text=json.dumps(message, indent=2), status=403)
