@@ -1,5 +1,7 @@
 # BankID Indikator (BIDI)
 
+[![flake8 Lint](https://github.com/kragebein/bankid/actions/workflows/flake8_lint.yml/badge.svg)](https://github.com/kragebein/bankid/actions/workflows/flake8_lint.yml)
+
 BankID Indikator viser BankID-status fra nettsidene til bankid.no
 
 De offentlige api-rutene til bankid inkluderer _ikke_ informasjon om en mobiloperatør har problemer med sine nettverk, bankid.no viser derimot denne informasjonen _gratis_.
