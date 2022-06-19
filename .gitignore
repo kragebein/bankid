@@ -1,0 +1,6 @@
+bankid/__pycache__
+.dockerignore
+test.py
+test2.py
+.vscode/
+.github/
