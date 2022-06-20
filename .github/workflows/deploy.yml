@@ -1,0 +1,27 @@
+name: Deploy
+
+on:
+  push:
+    push: { branches: master }
+jobs:
+  deploy:
+    if: ${{ github.event.pull_request.merged }}
+    runs-on: self-hosted
+    name: setup
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v2
+
+      - name: Build docker image
+        run: docker build -t bankid .
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_SECRET_KEY }}
+          known_hosts: "just-a-placeholder-so-we-dont-get-errors"
+          if_key_exists: ignore
+      - name: Adding known hosts
+        run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
+      - name: "Deploying image"
+        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && VAR=$(docker kill bankid) && S=$(docker rm bankid) && docker build -t bankid . && docker run -d -p 8080:8080 --name bankid bankid"
