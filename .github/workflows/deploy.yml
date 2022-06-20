@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build docker images
-        run: docker build -t bankid
+        run: docker build -t bankid .
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
