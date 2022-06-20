@@ -24,4 +24,4 @@ jobs:
       - name: Adding known hosts
         run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
       - name: "Deploying image"
-        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "git clone git@github.com:kragebein/bankid.git && cd bankid && docker build -t bankid && docker run -p 8080:8080 bankid -d"
+        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "git clone git@github.com:kragebein/bankid.git && cd bankid && docker build -t bankid . && docker run -p 8080:8080 bankid -d"
