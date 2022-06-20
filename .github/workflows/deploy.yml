@@ -20,6 +20,7 @@ jobs:
         with:
           key: ${{ secrets.SSH_SECRET_KEY }}
           known_hosts: "just-a-placeholder-so-we-dont-get-errors"
+          if_key_exists: ignore
       - name: Adding known hosts
         run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
       - name: "Deploying image"
