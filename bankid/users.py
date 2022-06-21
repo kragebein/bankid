@@ -32,11 +32,3 @@ class Users:
 
     def add(self, **user) -> None:
         pass
-
-
-class Test:
-    def __init(self):
-        ...
-
-    def something(self):
-        ...
