@@ -11,27 +11,27 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
+        - name: Get specific changed files
+          id: changed-files-specific
+          uses: tj-actions/changed-files@v23
+          with:
+            files: |
+              readme.md
+              *.py
+              templates
+              config.json
+              **/*.html
+              **/*.py
+              Dockerfile
+              requirements.txt
 
-      - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v9.2
-        id: verify-changed-files
-        with:
-          files: |
-            readme.md
-            *.py
-            templates
-            config.json
-            **/*.html
-            **/*.py
-            Dockerfile
-            requirements.txt
 
       - name: Build docker image
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.changed-files-specific.outputs.only_changed == 'true'
         run: docker build -t bankid .
 
       - name: Install SSH Key
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.changed-files-specific.outputs.only_changed == 'true'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_SECRET_KEY }}
@@ -39,9 +39,9 @@ jobs:
           if_key_exists: ignore
 
       - name: Adding known hosts
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.changed-files-specific.outputs.only_changed == 'true'
         run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
 
       - name: "Deploying image"
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.changed-files-specific.outputs.only_changed == 'true'
         run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && VAR=$(docker kill bankid) && S=$(docker rm bankid) && docker build -t bankid . && docker run -d -p 8080:8080 --network=host --name bankid bankid"
