@@ -115,7 +115,7 @@ class Timeline:
         """
 
         for _ in range(first, now, 3600):
-            # Inside the hour.
+            # Inside the hour..
 
             results = self.cursor.execute(query, (start, end)).fetchall()
             dict_results = {'red': [], 'orange': [], 'yellow': [], 'green': [], 'blue': [], 'black': []}
