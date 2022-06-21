@@ -1,10 +1,16 @@
-name: flake8 Lint
+name: Code standard
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "*" # matches every branch that doesn't contain a '/'
+      - "*/*" # matches every branch containing a single '/'
+      - "**" # matches every branch
+      - "!master" # excludes master
 jobs:
   flake8-lint:
     runs-on: self-hosted
-    name: Lint
+    name: Checking for linting issues.
     steps:
       - name: Check out source repository
         uses: actions/checkout@v2
