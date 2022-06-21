@@ -10,30 +10,34 @@ jobs:
       run_job: ${{ steps.check_files.outputs.run_job }}
     runs-on: self-hosted
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
+      - uses: actions/checkout@v2
 
-      - name: check modified files
-        id: check_files
+      - name: Change text file
         run: |
-          echo "=============== list modified files ==============="
-          git diff --name-only HEAD^ HEAD
+          echo "Modified" > new.txt
 
-          echo "========== check paths of modified files =========="
-          git diff --name-only HEAD^ HEAD > files.txt
-          while IFS= read -r file
-          do
-            echo $file
-            if [ "$file" != bankid/* ] && [ "$file" != templates/* ]; then
-              echo "The files changed does not require a redeployment."
-              echo "::set-output name=run_job::false"
-              break
-            else
-              echo "::set-output name=run_job::true"
-            fi
-          done < files.txt
+      - name: Change file in directory
+        run: |
+          echo "Changed" > test_directory/new.txt
+
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v9.2
+        id: verify-changed-files
+        with:
+          files: |
+            readme.md
+            *.py
+            templates
+            config.json
+            **/*.html
+            **/*.py
+            Dockerfile
+            requirements.txt
+      - name: Checking if files have been changed.
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: echo "::set-output name=run_job::true"
+        # Outputs: "Changed files: new.txt test_directory/new.txt"
+
   deploy:
     if: needs.check.outputs.run_job == 'true'
     runs-on: self-hosted
