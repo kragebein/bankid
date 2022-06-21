@@ -1,22 +1,25 @@
-
 from typing import Any
 
 
 class Users:
-
     def __init__(self, db):
         self.cursor = db.cursor
         self.user = None
 
     def sql(self, key) -> Any:
 
-        """ Requests the user data from the database"""
+        """Requests the user data from the database"""
         sql = 'SELECT * FROM users WHERE key = ?'
-        data = self.cursor.execute(sql, [key, ])
+        data = self.cursor.execute(
+            sql,
+            [
+                key,
+            ],
+        )
         return data.fetchall()
 
     def check(self, key) -> bool:
-        ''' Checks if key is in database'''
+        '''Checks if key is in database'''
 
         data = self.sql(key)
         if data and len(data) == 1:
@@ -29,3 +32,11 @@ class Users:
 
     def add(self, **user) -> None:
         pass
+
+
+class Test:
+    def __init(self):
+        ...
+
+    def something(self):
+        ...
