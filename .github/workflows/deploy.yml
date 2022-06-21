@@ -25,23 +25,13 @@ jobs:
             **/*.py
             Dockerfile
             requirements.txt
-      - name: Checking if files have been changed.
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        run: echo "::set-output name=run_job::true"
-        # Outputs: "Changed files: new.txt test_directory/new.txt"
-
-  deploy:
-    if: needs.check.outputs.run_job == 'true'
-    runs-on: self-hosted
-    name: Deploying
-    steps:
-      - name: Checkout.
-        uses: actions/checkout@v2
 
       - name: Build docker image
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: docker build -t bankid .
 
       - name: Install SSH Key
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_SECRET_KEY }}
@@ -49,7 +39,9 @@ jobs:
           if_key_exists: ignore
 
       - name: Adding known hosts
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
 
       - name: "Deploying image"
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && VAR=$(docker kill bankid) && S=$(docker rm bankid) && docker build -t bankid . && docker run -d -p 8080:8080 --network=host --name bankid bankid"
