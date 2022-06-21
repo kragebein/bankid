@@ -6,8 +6,7 @@ on:
 jobs:
   check:
     name: Check files
-    outputs:
-      run_job: ${{ steps.check_files.outputs.run_job }}
+
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
