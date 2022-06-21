@@ -26,7 +26,7 @@ jobs:
           while IFS= read -r file
           do
             echo $file
-            if [ "$file" != bankid/* ] ; [ "$file" != templates/* ]; then
+            if [ "$file" != bankid/* ] && [ "$file" != templates/* ]; then
               echo "The files changed does not require a redeployment."
               echo "::set-output name=run_job::false"
               break
