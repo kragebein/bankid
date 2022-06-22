@@ -27,6 +27,9 @@ jobs:
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
 
         run: |
+          if $(docker rm bankid); then
+            echo "Removed old temp container"
+          fi
           docker build -t bankid .
           docker run -d -p 8080:8080 --network=host --name bankid bankid
 
