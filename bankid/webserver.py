@@ -8,10 +8,20 @@ import datetime
 
 from aiohttp import web
 from bankid.config import Config
+from bankid.warden import Warden
 from bankid.bankid import BankID
 from bankid.classes import Auth, Api
 from bankid.stats import Stats, Timeline
 from bankid.db import Database
+
+import logging
+import sys
+
+logging.basicConfig(
+    format="%(message)s",
+    stream=sys.stdout,
+    level=logging.DEBUG,
+)
 
 
 class Webserver:
@@ -20,6 +30,7 @@ class Webserver:
     port: str = None
 
     def __init__(self):
+        self.log = Warden()
         self.db = Database()
         self.stat = Stats(self.db)
         self.bidi = BankID(self.stat)
@@ -39,20 +50,20 @@ class Webserver:
         app.add_routes(
             [
                 web.get('/{key}/bankid', self.bankid),
-                web.get('/healthcheck', self.healthcheck),
+                web.get('/health', self.healthcheck),
                 web.get('/{key}/api', self.api),
                 web.post('/{key}/admin', self.get_stats_post),
                 web.get('/{key}/admin', self.get_stats),
                 web.get('/', self.about),
             ]
         )
-
+        app.make_handler(access_log=Warden)
         runner = web.AppRunner(app)
         await runner.setup()
 
         site = web.TCPSite(runner, host=self.host, port=self.port)
         await site.start()
-        print(f'Running at {self.host}:{self.port}')
+        self.log.info(f'Running at {self.host}:{self.port}')
         await asyncio.Event().wait()
 
     async def healthcheck(self, request):  # noqa: W0613

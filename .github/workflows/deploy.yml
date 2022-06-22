@@ -26,9 +26,11 @@ jobs:
 
       - name: Setting up temporary docker image
         if: steps.changed-files-specific.outputs.only_changed == 'true'
+
         run: |
         docker build -t bankid .
         docker run -d -p 8080:8080 --name bankid bankid
+
 
       - name: Testing temporary container build
         if: steps.changed-files-specific.outputs.only_changed == 'true'
@@ -42,6 +44,7 @@ jobs:
         run: |
         docker kill bankid
         docker rm bankid
+
 
       - name: Install SSH Key
         if: steps.changed-files-specific.outputs.only_changed == 'true'
