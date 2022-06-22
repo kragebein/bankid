@@ -57,8 +57,8 @@ jobs:
 
       - name: Stopping old container
         run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "docker kill bankid"
-      
-      -name: Removing old container.
+
+      - name: Removing old container.
         run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "docker rm bankid"
 
       - name: "Deploying new container"
