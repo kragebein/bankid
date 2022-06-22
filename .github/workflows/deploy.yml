@@ -37,6 +37,7 @@ jobs:
           # Check the following URLs one by one sequentially
           max-attempts: 3
           retry-delay: 5s
+          retry-all: true
           url: http://localhost:8080/health
 
       - name: Clean up temporary
@@ -68,4 +69,5 @@ jobs:
           # Check the following URLs one by one sequentially
           max-attempts: 3
           retry-delay: 5s
+          retry-all: true
           url: https://lazywack.no:8080/health
