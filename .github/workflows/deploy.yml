@@ -67,16 +67,16 @@ jobs:
           url: https://bankid.lazywack.no/health
 
   cleanup:
-    - name: Clean up
-      runs-on: self-hosted
-      steps:
-        - name: Cleaning up temporary stuff.
-          #        if: steps.changed-files-specific.outputs.only_changed == 'true'
-          run: |
-            if $(docker kill bankid 2>> /dev/null); then
-              echo "Killed Bankid container"
-            fi
+    name: Cleanup
+    runs-on: self-hosted
+    steps:
+      - name: Cleaning up temporary stuff.
+        #        if: steps.changed-files-specific.outputs.only_changed == 'true'
+        run: |
+          if $(docker kill bankid 2>> /dev/null); then
+            echo "Killed Bankid container"
+          fi
 
-            if $(docker rm bankid 2>>/dev/null); then
-              echo "Removed bankid container."
-            fi
+          if $(docker rm bankid 2>>/dev/null); then
+            echo "Removed bankid container."
+          fi
