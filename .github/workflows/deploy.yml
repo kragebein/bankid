@@ -1,3 +1,4 @@
+name: Test and deploy
 on:
   push:
     branches:
@@ -38,7 +39,7 @@ jobs:
           max-attempts: 3
           retry-delay: 5s
           retry-all: true
-          url: http://localhost:8080/health
+          url: http://bankid:8080/health
 
       - name: Clean up temporary
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
