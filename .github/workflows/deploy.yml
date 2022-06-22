@@ -26,6 +26,8 @@ jobs:
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
 
         run: |
+          v=$(docker kill bankid)
+          v=$(docker rm bankid)
           docker build -t bankid .
           docker run -d -p 8080:8080 --name bankid bankid
 
