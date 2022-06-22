@@ -93,8 +93,8 @@ class BankID:
         '''Updating the web view, api and db with status change.'''
         extra = None if code in [1, 9] else await self.get_extra(data)
 
-        if code != self.status.statuscode and code not in [1, 9]:
-            await self.stats.changestatus(self.code[code]['color'], extra)
+        # if code != self.status.statuscode and code not in [1, 9]:
+        # await self.stats.changestatus(self.code[code]['color'], extra)
 
         self.status = Status(
             int(code),
