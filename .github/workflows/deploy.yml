@@ -23,18 +23,14 @@ jobs:
       #            Dockerfile
       #            requirements.txt
 
-      - name: Setting up temporary docker image
+      - name: Testing build
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
 
         run: |
           docker build -t bankid .
           docker run -d -p 8080:8080 --network=host --name bankid bankid
-          docker inspect bankid
-          docker ps
-          ip a
-          sleep 10
 
-      - name: Testing temporary container build
+      - name: Testing response from api.
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
         uses: jtalk/url-health-check-action@v2
         with:
@@ -44,13 +40,7 @@ jobs:
           retry-all: true
           url: http://localhost:8080/health
 
-      - name: Clean up temporary
-        #        if: steps.changed-files-specific.outputs.only_changed == 'true'
-        run: |
-          V=$(docker kill bankid)
-          B=($docker rm bankid)
-
-      - name: Install SSH Key
+      - name: Setting up SSH 1
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
         uses: shimataro/ssh-key-action@v2
         with:
@@ -58,7 +48,7 @@ jobs:
           known_hosts: "just-a-placeholder-so-we-dont-get-errors"
           if_key_exists: ignore
 
-      - name: Adding known hosts
+      - name: Setting up SSH 2
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
         run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
 
@@ -75,3 +65,18 @@ jobs:
           retry-delay: 5s
           retry-all: true
           url: https://bankid.lazywack.no/health
+
+  cleanup:
+    - name: Clean up
+      runs-on: self-hosted
+      steps:
+        - name: Cleaning up temporary stuff.
+          #        if: steps.changed-files-specific.outputs.only_changed == 'true'
+          run: |
+            if $(docker kill bankid 2>> /dev/null); then
+              echo "Killed Bankid container"
+            fi
+
+            if $(docker rm bankid 2>>/dev/null); then
+              echo "Removed bankid container."
+            fi
