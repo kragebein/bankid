@@ -30,6 +30,8 @@ jobs:
           v=$(docker rm bankid)
           docker build -t bankid .
           docker run -d -p 8080:8080 --name bankid bankid
+          docker inspect bankid
+          docker ps
 
       - name: Testing temporary container build
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
