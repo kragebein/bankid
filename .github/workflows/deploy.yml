@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   check:
-    name: Check files
+    name: Test and deploy to lazywack
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
@@ -38,11 +38,11 @@ jobs:
           # Check the following URLs one by one sequentially
           url: http://localhost:8080/health
 
-      - name: Clean up check
+      - name: Clean up temporary
         if: steps.changed-files-specific.outputs.only_changed == 'true'
         run: |
-          docker kill bankid
-          docker rm bankid
+          V=$(docker kill bankid)
+          B=($docker rm bankid)
 
       - name: Install SSH Key
         if: steps.changed-files-specific.outputs.only_changed == 'true'
