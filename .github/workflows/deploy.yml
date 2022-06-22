@@ -67,6 +67,7 @@ jobs:
           url: https://bankid.lazywack.no/health
 
   cleanup:
+    needs: [check]
     name: Cleanup
     runs-on: self-hosted
     steps:

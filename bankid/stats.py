@@ -36,7 +36,7 @@ class Stats:
 
     async def changestatus(self, color=None, reason=None):
         '''Registers a status change'''
-
+        print(color, reason)
         # colors = {
         #    'yellow': ':large_yellow_circle:',
         #    'green': ':large_green_circle:',
