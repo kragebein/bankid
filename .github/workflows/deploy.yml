@@ -27,24 +27,22 @@ jobs:
       - name: Setting up temporary docker image
         if: steps.changed-files-specific.outputs.only_changed == 'true'
 
-        - run: |
+        run: |
           docker build -t bankid .
           docker run -d -p 8080:8080 --name bankid bankid
-
 
       - name: Testing temporary container build
         if: steps.changed-files-specific.outputs.only_changed == 'true'
         uses: jtalk/url-health-check-action@v2
         with:
-        # Check the following URLs one by one sequentially
-        url: http://localhost:8080/health
+          # Check the following URLs one by one sequentially
+          url: http://localhost:8080/health
 
       - name: Clean up check
         if: steps.changed-files-specific.outputs.only_changed == 'true'
-        - run: |
+        run: |
           docker kill bankid
           docker rm bankid
-
 
       - name: Install SSH Key
         if: steps.changed-files-specific.outputs.only_changed == 'true'
@@ -56,16 +54,15 @@ jobs:
 
       - name: Adding known hosts
         if: steps.changed-files-specific.outputs.only_changed == 'true'
-        - run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
+        run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
 
       - name: "Deploying image"
         if: steps.changed-files-specific.outputs.only_changed == 'true'
-        - run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && VAR=$(docker kill bankid) && S=$(docker rm bankid) && docker build -t bankid . && docker run -d -p 8080:8080 --network=host --name bankid bankid"
-      
+        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && VAR=$(docker kill bankid) && S=$(docker rm bankid) && docker build -t bankid . && docker run -d -p 8080:8080 --network=host --name bankid bankid"
+
       - name: Testing live image
         if: steps.changed-files-specific.outputs.only_changed == 'true'
         uses: jtalk/url-health-check-action@v2
         with:
-        # Check the following URLs one by one sequentially
-        url: https://lazywack.no:8080/health
-
+          # Check the following URLs one by one sequentially
+          url: https://lazywack.no:8080/health
