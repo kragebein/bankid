@@ -6,11 +6,13 @@ import asyncio
 from typing import Any
 from bs4 import BeautifulSoup
 from bankid.classes import Status
+from bankid.warden import Warden
 
 
 class BankID:
     def __init__(self, stats):
         self.stats = stats
+        self.log = Warden()
         self.status = Status()
         self.timeline = Timeline()
         self.openapi = {}
@@ -73,7 +75,7 @@ class BankID:
 
             for code in self.code:
                 if self.code[code]['field'] in _data:
-                    print(f'Status: {code}')
+                    self.log.info('Status retrieved', code=code)
                     return code
         # Return error code we couldnt find 'field' data.
         return 9
@@ -126,9 +128,9 @@ class BankID:
             r = requests.get(url, headers=header)
             if r.status_code == 200:
                 return r.json()
-        except Exception as E:  # noqa: W0703
+        except Exception:  # noqa: W0703
             self.stats.errors()
-            print(E)
+            self.log.exception('Exception occured while retrieving data from bankid-services.statuspage.io')
             return response
 
     async def get_extra(self, data: str) -> Any:
@@ -146,8 +148,8 @@ class BankID:
                 return r.content
             else:
                 return None
-        except requests.exceptions.RequestException as e:
-            print(f'Error while requesting, error: {e}')
+        except requests.exceptions.RequestException:
+            self.log.exception('Unable to retrieve data from bankid.no')
             await self.stats.errors()
             return None
 

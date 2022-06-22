@@ -1,5 +1,9 @@
 from typing import Any
 
+from bankid.warden import Warden
+
+log = Warden()
+
 
 class Users:
     def __init__(self, db):
@@ -26,7 +30,7 @@ class Users:
             self.user = data[0]
             return True
         elif data and len(data) > 1:
-            print(f'Error, too many results for this api key:{key}')
+            log.error('Error, too many results for this api key', key=key, results=len(data))
             return False
         return False
 

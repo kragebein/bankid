@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from bankid.users import Users
+from bankid.warden import Warden
 import datetime
+
+log = Warden()
 
 
 @dataclass(frozen=True)
@@ -26,8 +29,7 @@ class Auth:
     def __init__(self, key, db):
         self.x = Users(db)
         if self.x.check(key):
-            timestamp = f'[{datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")}] '
-            print(timestamp, self.x.user)
+            log.info('Access granted to api', user=self.x.user[2])
             self.is_auth = True
             self.user = self.x.user
 
