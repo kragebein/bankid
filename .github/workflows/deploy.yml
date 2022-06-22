@@ -70,7 +70,7 @@ jobs:
     - name: Clean up
       runs-on: self-hosted
       steps:
-        - name: Test okay.
+        - name: Cleaning up temporary stuff.
           #        if: steps.changed-files-specific.outputs.only_changed == 'true'
           run: |
             if $(docker kill bankid 2>> /dev/null); then
