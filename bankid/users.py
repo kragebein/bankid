@@ -36,3 +36,8 @@ class Users:
 
     def add(self, **user) -> None:
         pass
+
+
+class classy:
+    def __init__(self):
+        ...
