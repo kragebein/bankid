@@ -27,9 +27,8 @@ jobs:
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
 
         run: |
-          v=$(docker rm bankid)
           docker build -t bankid .
-          docker run -d -p 8080:8080 --name bankid bankid
+          docker run -d -p 8080:8080 --network=host --name bankid bankid
           docker inspect bankid
           docker ps
           ip a
@@ -42,7 +41,7 @@ jobs:
           max-attempts: 3
           retry-delay: 5s
           retry-all: true
-          url: http://0.0.0.0:8080/health
+          url: http://localhost:8080/health
 
       - name: Clean up temporary
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
