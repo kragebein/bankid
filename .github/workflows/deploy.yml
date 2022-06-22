@@ -28,8 +28,8 @@ jobs:
         if: steps.changed-files-specific.outputs.only_changed == 'true'
 
         - run: |
-        docker build -t bankid .
-        docker run -d -p 8080:8080 --name bankid bankid
+          docker build -t bankid .
+          docker run -d -p 8080:8080 --name bankid bankid
 
 
       - name: Testing temporary container build
@@ -42,8 +42,8 @@ jobs:
       - name: Clean up check
         if: steps.changed-files-specific.outputs.only_changed == 'true'
         - run: |
-        docker kill bankid
-        docker rm bankid
+          docker kill bankid
+          docker rm bankid
 
 
       - name: Install SSH Key
