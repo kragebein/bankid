@@ -52,9 +52,15 @@ jobs:
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
         run: ssh-keyscan -p ${{secrets.SSH_SECRET_PORT }} -H ${{ secrets.SSH_SECRET_HOST }} >> ~/.ssh/known_hosts
 
-      - name: "Deploying image"
+      - name: Stopping old container
+        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "docker kill bankid"
+      
+      -name: Removing old container.
+        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "docker rm bankid"
+
+      - name: "Deploying new container"
         #       if: steps.changed-files-specific.outputs.only_changed == 'true'
-        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && VAR=$(docker kill bankid) && S=$(docker rm bankid) && docker build -t bankid . && docker run -d -p 8080:8080 --network=host --name bankid bankid"
+        run: ssh ${{secrets.SSH_SECRET_HOST}} -p ${{secrets.SSH_SECRET_PORT}} "cd bankid/ && git pull && docker build -t bankid . && docker run -d -p 8080:8080 --network=host --name bankid bankid"
 
       - name: Testing live image
         #        if: steps.changed-files-specific.outputs.only_changed == 'true'
