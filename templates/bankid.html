@@ -9,6 +9,10 @@ a {text-decoration: none;}
   display: flex;
   vertical-align: middle;
 }
+.day-container {
+  display: flex;
+  vertical-align: middle;
+}
 .blob {
   background: black;
   border-radius: 50%;
@@ -240,6 +244,18 @@ a {text-decoration: none;}
   background-color: grey;
 }
 
+#seperator{
+  height: 3px;
+  width: 1px;
+  background-color: black;
+}
+
+#blank-pixel{
+  height: 1px;
+  width: 1px;
+
+}
+
 .cellContainer {
   width: 100%;
   float: left;
@@ -283,8 +299,32 @@ a {text-decoration: none;}
 
 <div class="blobs-container">
 {% for things in timeline.query() %} 
-
 <div id="line-{{things.color}}" title="{{things.time}} - {{things.status}}"></div>
 {% endfor %}
+</div>
+  <div class="blobs-container">
+    <!-- past_week -->
+    {% set past_week = timeline.past_week() %}
+    {% for pixel in range(0,168) %}
+      {% if loop.index == 24 %}
+        <div id="seperator"></div>
+      {% elif loop.index == 48 %}
+        <div id="seperator"></div>
+      {% elif loop.index == 72 %}
+        <div id="seperator"></div>
+      {% elif loop.index == 96 %}
+        <div id="seperator"></div>
+      {% elif loop.index == 120 %}
+        <div id="seperator"></div>
+      {% elif loop.index == 144 %}
+        <div id="seperator"></div>
+      {% elif loop.index == 168 %}
+        <div id="seperator"></div>
+      {% else %}
+        <div id="blank-pixel"></div>
+      {% endif %}
+    {% endfor %}
+    
+  </div>
 </div>
 

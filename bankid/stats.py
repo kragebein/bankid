@@ -97,15 +97,15 @@ class Timeline:
         '''Returns the week that was'''
         today = datetime.datetime.today().weekday()
         week = [
-            'Mandag',
-            'Tirsdag',
-            'Onsdag',
-            'Torsdag',
-            'Fredag',
-            'Lørdag',
-            'Søndag',
+            'Man',
+            'Tir',
+            'Ons',
+            'Tor',
+            'Fre',
+            'Lør',
+            'Søn',
         ]
-        return week[:today] + week[today:]
+        return week[today:] + week[:today]
 
     def query(self):
         '''Queries the database cache for information.'''
