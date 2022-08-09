@@ -93,12 +93,33 @@ class Timeline:
     def e2t(self, n: int) -> datetime:
         return datetime.datetime.fromtimestamp(n).strftime('%Y-%m-%d %H:59:59')
 
+    def past_week(self):
+        '''Returns the week that was'''
+        today = datetime.datetime.today().weekday()
+        week = [
+            'Mandag',
+            'Tirsdag',
+            'Onsdag',
+            'Torsdag',
+            'Fredag',
+            'Lørdag',
+            'Søndag',
+        ]
+        return week[:today] + week[today:]
+
     def query(self):
+        '''Queries the database cache for information.'''
+
+        # First we ask the database for the time now as int
         now = int(self.cursor.execute("SELECT strftime('%s', 'now') as INT").fetchone()[0])
+
+        # calculate the start time. 60480 seconds is exactly 168 hours (7 days) ago.
         first = now - 604800
 
         start = first
         end = start + 3600
+
+        # Setting up the query
         c = 0
 
         query = """
@@ -114,8 +135,8 @@ class Timeline:
                 ?
         """
 
+        # Fetching data from the last 168 hours.
         for _ in range(first, now, 3600):
-            # Inside the hour..
 
             results = self.cursor.execute(query, (start, end)).fetchall()
             dict_results = {'red': [], 'orange': [], 'yellow': [], 'green': [], 'blue': [], 'black': []}
