@@ -19,8 +19,7 @@ import sys
 
 logging.basicConfig(
     format="%(message)s",
-    stream=sys.stdout,
-    level=logging.DEBUG,
+    level=logging.INFO,
 )
 
 
@@ -31,6 +30,7 @@ class Webserver:
 
     def __init__(self):
         self.log = Warden()
+        self.log.application_name = 'BIDI'
         self.db = Database()
         self.stat = Stats(self.db)
         self.bidi = BankID(self.stat)
@@ -39,7 +39,7 @@ class Webserver:
 
     async def run(self) -> None:
         '''Sets up and runs an aiohttp web server with the bankid and api routes
-        THIS IS BLOCKING
+
         '''
         self.config.read(self)
         app = web.Application()
