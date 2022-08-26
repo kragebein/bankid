@@ -4,9 +4,8 @@ from bankid.webserver import Webserver
 import bankid.warden
 
 log = bankid.warden.Warden()
-log.loglevel = bankid.warden.DEBUG
 log.application_name = 'bidi'
-
+log.loglevel = bankid.warden.INFO
 
 if __name__ == '__main__':
     web = Webserver()

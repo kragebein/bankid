@@ -61,7 +61,7 @@ class Warden:
     application_name: str = None
     catch_all: bool = True
 
-    log: structlog.BoundLogger = None
+    log: structlog.BoundLogger = structlog.get_logger()
 
     instance = None
 
@@ -260,7 +260,7 @@ class Warden:
         return orjson.dumps(event_dict, default=orjson_fallback_handler).decode()  # noqa: E1101
 
     def _how_we_work(self, _, __, event_dict) -> dict:
-        '''Comply with https://github.com/MiraiEx/how-we-work/blob/master/logging.md'''
+        '''Comply with standardization of structured logging'''
         sha = os.getenv('GIT_SHA', None)
         if sha:
             event_dict['git_commit'] = sha
@@ -286,7 +286,7 @@ class Warden:
             # "extra". IMPORTANT: This means that the standard library MUST
             # render "extra" for the context to appear in log entries! See
             # warning below.
-            # structlog.stdlib.render_to_log_kwargs,
+            #structlog.stdlib.render_to_log_kwargs,
         ]
         render = structlog.dev.ConsoleRenderer()
         if os.getenv('AWS', 'localdev') in ['production', 'prod', 'test', 'testing']:
@@ -303,15 +303,15 @@ class Warden:
             processors=processors,
             logger_factory=structlog.stdlib.LoggerFactory(),
         )
-        # formatter = structlog.stdlib.ProcessorFormatter(
-        #    processors=[structlog.dev.ConsoleRenderer()],
-        # )
-        # handler = logging.StreamHandler()
+        formatter = structlog.stdlib.ProcessorFormatter(
+           processors=[structlog.dev.ConsoleRenderer()],
+        )
+        #handler = logging.StreamHandler()
         # Use OUR `ProcessorFormatter` to format all `logging` entries.
-        # handler.setFormatter(formatter)
-        # root_logger = logging.getLogger()
-        # root_logger.addHandler(handler)
-        # root_logger.setLevel(self.loglevel)
+        #handler.setFormatter(formatter)
+        #root_logger = logging.getLogger()
+        #root_logger.addHandler(handler)
+        #root_logger.setLevel(self.loglevel)
         self.log = structlog.get_logger()
 
         # Catches uncaught exceptions
