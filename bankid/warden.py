@@ -6,7 +6,7 @@ import sys
 from traceback import walk_tb
 from types import TracebackType
 from typing import Any, Optional, Type, Union
-
+import rich
 import attrs
 import orjson
 import structlog
@@ -274,22 +274,14 @@ class Warden:
             self._how_we_work,
             structlog.processors.TimeStamper(fmt='iso'),
             structlog.processors.add_log_level,
-            structlog.stdlib.filter_by_level,
-            structlog.stdlib.add_logger_name,
-            structlog.stdlib.add_log_level,
-            structlog.stdlib.PositionalArgumentsFormatter(),
+
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             structlog.processors.UnicodeDecoder(),
-            # Transform event dict into `logging.Logger` method arguments.
-            # "event" becomes "msg" and the rest is passed as a dict in
-            # "extra". IMPORTANT: This means that the standard library MUST
-            # render "extra" for the context to appear in log entries! See
-            # warning below.
-            #structlog.stdlib.render_to_log_kwargs,
+
         ]
         render = structlog.dev.ConsoleRenderer()
-        if os.getenv('AWS', 'localdev') in ['production', 'prod', 'test', 'testing']:
+        if os.getenv('AWS') in ['production', 'prod', 'test', 'testing']:
             render = self.__render_orjson
         if os.getenv('JSON', '0') == '1':
             render = self.__render_orjson
@@ -301,17 +293,12 @@ class Warden:
         structlog.configure(
             wrapper_class=structlog.make_filtering_bound_logger(self.loglevel),
             processors=processors,
-            logger_factory=structlog.stdlib.LoggerFactory(),
+
         )
         formatter = structlog.stdlib.ProcessorFormatter(
            processors=[structlog.dev.ConsoleRenderer()],
         )
-        #handler = logging.StreamHandler()
-        # Use OUR `ProcessorFormatter` to format all `logging` entries.
-        #handler.setFormatter(formatter)
-        #root_logger = logging.getLogger()
-        #root_logger.addHandler(handler)
-        #root_logger.setLevel(self.loglevel)
+
         self.log = structlog.get_logger()
 
         # Catches uncaught exceptions
