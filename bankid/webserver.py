@@ -14,14 +14,6 @@ from bankid.classes import Auth, Api
 from bankid.stats import Stats, Timeline
 from bankid.db import Database
 
-import logging
-import sys
-
-logging.basicConfig(
-    format="%(message)s",
-    level=logging.INFO,
-)
-
 
 class Webserver:
 
@@ -30,7 +22,6 @@ class Webserver:
 
     def __init__(self):
         self.log = Warden()
-        self.log.application_name = 'BIDI'
         self.db = Database()
         self.stat = Stats(self.db)
         self.bidi = BankID(self.stat)

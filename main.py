@@ -5,7 +5,7 @@ import bankid.warden
 
 log = bankid.warden.Warden()
 log.application_name = 'bidi'
-log.loglevel = bankid.warden.INFO
+log.loglevel = bankid.warden.DEBUG
 
 if __name__ == '__main__':
     web = Webserver()
