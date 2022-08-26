@@ -40,3 +40,13 @@ Det startes da opp en webserver på http://0.0.0.0:8080 (med mindre annet konfig
 
 1. `docker build -t bankid .`
 2. `docker run -d -p 8080:8080 --network=host --name bankid bankid`
+
+# Logging
+
+Application comes with Warden - "A structured singleton logging facility".
+
+Set enviroment variable `JSON` to 1 to render logs suitable for AWS CloudWatch.
+
+Set enviroment variable `CONSOLE` to 1 to render fancy logs. (Only applicable in AWS enviroment)
+
+Will render fancy logs by default.
