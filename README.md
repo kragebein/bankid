@@ -1,6 +1,6 @@
 # BankID Indikator (BIDI)
 
-[![flake8 Lint](https://github.com/kragebein/bankid/actions/workflows/flake8_lint.yml/badge.svg)](https://github.com/kragebein/bankid/actions/workflows/flake8_lint.yml)[![Deploy](https://github.com/kragebein/bankid/actions/workflows/deploy.yml/badge.svg)](https://github.com/kragebein/bankid/actions/workflows/deploy.yml)
+[![flake8 Lint](https://github.com/kragebein/bankid/actions/workflows/flake8_lint.yml/badge.svg)](https://github.com/kragebein/bankid/actions/workflows/flake8_lint.yml)
 
 BankID Indikator viser BankID-status fra nettsidene til bankid.no
 
