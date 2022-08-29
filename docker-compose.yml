@@ -1,11 +1,10 @@
 services:
   bankid:
+    image: bankid
     build: https://github.com/kragebein/bankid.git
+
     ports:
       - "8080:8080"
-    volumes:
-      - .:/app
+
     environment:
       - ENV=production
-volumes:
-  peristant:
