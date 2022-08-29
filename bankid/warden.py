@@ -6,7 +6,6 @@ import sys
 from traceback import walk_tb
 from types import TracebackType
 from typing import Any, Optional, Type, Union
-import rich
 import attrs
 import orjson
 import structlog
@@ -281,7 +280,7 @@ class Warden:
 
         ]
         render = structlog.dev.ConsoleRenderer()
-        if os.getenv('AWS') in ['production', 'prod', 'test', 'testing']:
+        if os.getenv('ENV') in ['production', 'prod', 'test', 'testing']:
             render = self.__render_orjson
         if os.getenv('JSON', '0') == '1':
             render = self.__render_orjson
